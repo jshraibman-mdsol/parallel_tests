@@ -6,6 +6,10 @@ module ParallelTests
       def self.run_tests(test_files, process_number, options)
         color = ($stdout.tty? ? 'AUTOTEST=1 ; export AUTOTEST ;' : '')#display color when we are in a terminal
         runtime_logging = " --format ParallelTests::Cucumber::RuntimeLogger --out #{runtime_log}"
+        if options[:group_by] == :tags
+          # In this case test_files are tags, not files
+          test_files = ["-t #{ test_files.join(',') }"]
+        end
         cmd = [
           color,
           executable,
@@ -79,8 +83,11 @@ module ParallelTests
       end
 
       def self.tests_in_groups(tests, num_groups, options={})
-        if options[:group_by] == :steps
-          Grouper.by_steps(find_tests(tests, options), num_groups)
+        test_files = find_tests(tests, options)
+        if options[:group_by] == :tags
+          Grouper.by_tags(test_files, num_groups)
+        elsif options[:group_by] == :steps
+          Grouper.by_steps(test_files, num_groups)
         else
           super
         end
