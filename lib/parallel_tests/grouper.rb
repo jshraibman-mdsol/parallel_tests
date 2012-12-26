@@ -48,6 +48,37 @@ module ParallelTests
       group[:size] += size
     end
 
+    def self.by_tags(test_files, num_groups)
+      #TODO: factor out common code
+      require 'parallel_tests/cucumber/gherkin_listener'
+      listener = Cucumber::GherkinListener.new
+      parser = Gherkin::Parser::Parser.new(listener, true, 'root')
+      test_files.each{|file|
+        parser.parse(File.read(file), file, 0)
+      }
+      #TODO: make regex an option
+      pbs = listener.tags.grep(/@PB.*/)
+      pbs.uniq!
+      pbs.shuffle!
+      split_arr_in_groups(pbs, num_groups)
+    end
+
+    def self.split_arr_in_groups(arr, num_groups)
+      return arr.map { |s| [s] } if arr.length <= num_groups
+      num_in_each_group = arr.length / num_groups
+      remainder = arr.length % num_groups
+      groups = []
+      lower_bound = 0
+      (1..num_groups).each do |group_idx|
+        upper_bound = lower_bound + num_in_each_group
+        upper_bound +=1 if group_idx <= remainder
+        groups << arr[lower_bound...upper_bound]
+        lower_bound = upper_bound
+      end
+      groups
+    end
+
+
     def self.by_steps(tests, num_groups)
       features_with_steps = build_features_with_steps(tests)
       in_even_groups_by_size(features_with_steps, num_groups)
