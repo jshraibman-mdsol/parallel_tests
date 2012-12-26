@@ -3,11 +3,12 @@ require 'gherkin'
 module ParallelTests
   module Cucumber
     class GherkinListener
-      attr_reader :collect
+      attr_reader :collect, :tags
 
       def initialize
         @steps, @uris = [], []
         @collect = {}
+        @tags = []
         reset_counters!
       end
 
@@ -16,6 +17,7 @@ module ParallelTests
       end
 
       def scenario(*args)
+        args.each{ |scenario| scenario.tags.each{ |tag| @tags << tag.name }}
         @scenarios += 1
         @outline = @background = 0
       end
