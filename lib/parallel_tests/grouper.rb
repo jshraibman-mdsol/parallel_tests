@@ -53,11 +53,13 @@ module ParallelTests
       require 'parallel_tests/cucumber/gherkin_listener'
       listener = Cucumber::GherkinListener.new
       parser = Gherkin::Parser::Parser.new(listener, true, 'root')
+      #TODO: make regex a command line option instead of hardcoding
+      listener.uniq_tag_pattern = /@PB.*/
+      listener.ignore_tag_pattern = /@(EndToEnd|WIP|Draft|Manual)/
       test_files.each{|file|
         parser.parse(File.read(file), file, 0)
       }
-      #TODO: make regex an option
-      pbs = listener.tags.grep(/@PB.*/)
+      pbs = listener.tags
       pbs.uniq!
       pbs.shuffle!
       split_arr_in_groups(pbs, num_groups)
