@@ -55,7 +55,7 @@ module ParallelTests
       parser = Gherkin::Parser::Parser.new(listener, true, 'root')
       #TODO: make regex a command line option instead of hardcoding
       listener.uniq_tag_pattern = /@PB.*/
-      listener.ignore_tag_pattern = /@(EndToEnd|WIP|Draft|Manual)/
+      listener.ignore_tag_pattern = /@(EndToEnd|WIP|Draft|Manual|Focus)/
       test_files.each{|file|
         parser.parse(File.read(file), file, 0)
       }
